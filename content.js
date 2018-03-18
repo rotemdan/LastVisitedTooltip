@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", init, false);
 
 function init() {
-	const handlerInstalled = new Set();
+	const handlerInstalled = new WeakSet();
 
 	addHandlers();
 	setInterval(addHandlers, 100);
@@ -58,7 +58,7 @@ function init() {
 					// Chrome seems to order in chronological order
 					// Firefox seems to order in reverse chronological order
 					visits.sort((a, b) => a.visitTime - b.visitTime);
-					
+
 					const lastVisitTimestamp = visits[visits.length - 1].visitTime;
 					const lastVisitedText = `[Last visited: ${formatIntervalSinceTimestamp(lastVisitTimestamp)}]`;
 
