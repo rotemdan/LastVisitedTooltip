@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "Last Visited Toolip",
 	"version": "0.1.0",
-	"description": "Adds last visit time to visited link toolips.",
+	"description": "Shows last visit time in link toolips.",
 	"icons": {
 		"48": "icons/icon-48.png",
 		"96": "icons/icon-96.png"
