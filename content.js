@@ -4,7 +4,8 @@ function init() {
 	const handlerInstalled = new WeakSet();
 
 	addHandlers();
-	setInterval(addHandlers, 100);
+	window.onload = addHandlers;
+	setInterval(addHandlers, 2000);
 
 	function addHandlers() {
 		const anchorElements = document.querySelectorAll("a");
