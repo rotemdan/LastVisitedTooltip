@@ -5,7 +5,7 @@ function init() {
 
 	addHandlers();
 	window.onload = addHandlers;
-	setInterval(addHandlers, 2000);
+	setInterval(addHandlers, 1000);
 
 	function addHandlers() {
 		const anchorElements = document.querySelectorAll("a");
