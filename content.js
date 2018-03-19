@@ -3,77 +3,67 @@ document.addEventListener("DOMContentLoaded", init, false);
 function init() {
 	const handlerInstalled = new WeakSet();
 
-	addHandlers();
-	window.onload = addHandlers;
-	setInterval(addHandlers, 1000);
+	document.body.addEventListener('mouseenter', async (e) => {
+		const targetElement = e.target;
 
-	function addHandlers() {
-		const anchorElements = document.querySelectorAll("a");
+		if (targetElement.tagName != 'A') {
+			return;
+		}
 
-		for (let anchorElement of anchorElements) {
-			if (handlerInstalled.has(anchorElement)) {
-				continue;
-			} else {
-				handlerInstalled.add(anchorElement);
+		const anchorElement = targetElement;
+		const url = targetElement.href;
+
+		if (!/^https?:\/\//.test(url)) {
+			return;
+		}
+
+		const originalTooltip = targetElement.getAttribute('title');
+		log(`mouseenter url: ${url}, original tooltip: '${originalTooltip}'`);
+
+		let tooltipModified = false;
+		let mouseLeft = false;
+
+		function mouseleaveHandler(e) {
+			mouseLeft = true;
+			anchorElement.removeEventListener('mouseleave', mouseleaveHandler);
+
+			if (tooltipModified == false) {
+				return;
 			}
 
-			anchorElement.addEventListener('mouseenter', async (e) => {
-				const targetElement = e.target;
-				const url = targetElement.href;
+			const targetElement = e.target;
+			const url = targetElement.href;
 
-				if (!/^https?:\/\//.test(url)) {
-					return;
-				}
+			log(`mouseleave ${url}`);
 
-				const originalTooltip = targetElement.getAttribute('title');
-				log(`mouseenter url: ${url}, original tooltip: '${originalTooltip}'`);
-
-				let tooltipModified = false;
-				let mouseLeft = false;
-
-				function mouseleaveHandler(e) {
-					mouseLeft = true;
-					anchorElement.removeEventListener('mouseleave', mouseleaveHandler);
-
-					if (tooltipModified == false) {
-						return;
-					}
-
-					const targetElement = e.target;
-					const url = targetElement.href;
-
-					log(`mouseleave ${url}`);
-
-					if (originalTooltip == null) {
-						targetElement.removeAttribute('title');
-					} else {
-						targetElement.setAttribute('title', originalTooltip);
-					}
-				}
-
-				anchorElement.addEventListener('mouseleave', mouseleaveHandler, false);
-
-				const visits = await browser.runtime.sendMessage({ operation: "getVisits", url });
-
-				if (visits.length > 0 && mouseLeft === false) {
-					// Chrome seems to order in chronological order
-					// Firefox seems to order in reverse chronological order
-					visits.sort((a, b) => a.visitTime - b.visitTime);
-
-					const lastVisitTimestamp = visits[visits.length - 1].visitTime;
-					const lastVisitedText = `[Last visited: ${formatIntervalSinceTimestamp(lastVisitTimestamp)}]`;
-
-					if (originalTooltip && originalTooltip.length > 0) {
-						targetElement.setAttribute('title', `${originalTooltip} ${lastVisitedText}`);
-					} else {
-						targetElement.setAttribute('title', lastVisitedText);
-					}
-
-					tooltipModified = true;
-				}
-			});
+			if (originalTooltip == null) {
+				targetElement.removeAttribute('title');
+			} else {
+				targetElement.setAttribute('title', originalTooltip);
+			}
 		}
-	}
+
+		anchorElement.addEventListener('mouseleave', mouseleaveHandler, false);
+
+		const visits = await browser.runtime.sendMessage({ operation: "getVisits", url });
+
+		if (visits.length > 0 && mouseLeft === false) {
+			// Chrome seems to order in chronological order
+			// Firefox seems to order in reverse chronological order
+			visits.sort((a, b) => a.visitTime - b.visitTime);
+
+			const lastVisitTimestamp = visits[visits.length - 1].visitTime;
+			const lastVisitedText = `[Last visited: ${formatIntervalSinceTimestamp(lastVisitTimestamp)}]`;
+
+			if (originalTooltip && originalTooltip.length > 0) {
+				targetElement.setAttribute('title', `${originalTooltip} ${lastVisitedText}`);
+			} else {
+				targetElement.setAttribute('title', lastVisitedText);
+			}
+
+			tooltipModified = true;
+		}
+	}, true);
 }
 
 function formatIntervalSinceTimestamp(originTimestamp) {
