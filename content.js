@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", init, false);
 
 function init() {
-	const handlerInstalled = new WeakSet();
-
 	document.body.addEventListener('mouseenter', async (e) => {
 		const targetElement = e.target;
 
